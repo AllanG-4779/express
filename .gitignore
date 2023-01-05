@@ -4,3 +4,4 @@
 /storage
 /tests
 /dist
+/prisma/migrations
