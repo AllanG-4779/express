@@ -15,7 +15,7 @@ categoryRouter.get("/:id", getCategory);
 
 categoryRouter.delete("/:id", deleteCategory);
 // //update category by id
-categoryRouter.put("/:id", updateCategory);
+categoryRouter.patch("/:id", updateCategory);
 // get category by id
 
 export default categoryRouter;

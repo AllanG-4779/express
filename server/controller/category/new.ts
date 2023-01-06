@@ -1,18 +1,18 @@
 import { Category } from "@prisma/client";
 import db from "../../utils/connection";
 import { Request, Response } from "express";
+import { exists } from "../../utils/validations/duplicate";
 
 export const addNewCategory = async (req: Request, res: Response) => {
   const category: Category = req.body;
 
   if (category.name !== null) {
-    // check if category already exists
-    const categoryExists = await db.category.findFirst({
-      where: { name: category.name },
-    });
-    if (categoryExists) {
-      return res.status(400).json({ message: "Category already exists" });
+   
+    const exist = await exists(res, "category", "name");
+    if (exist) {
+      return res.status(400).json({ message: "Category already added" });
     }
+
     try {
       await db.category.create({ data: category });
     } catch (error) {

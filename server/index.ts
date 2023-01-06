@@ -3,6 +3,7 @@ import express, { Express, NextFunction, Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import categoryRouter from "./routes/category";
 import { logger } from "./middleware/logger";
+import postRouter from "./routes/posts";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(cookieParser());
 // body parser for url encoded
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/category", categoryRouter);
+app.use("/api/v1/posts", postRouter);
 // 404 handler
 app.use((req: Request, res: Response, next: NextFunction) => {
   return res.status(404).json({ message: "Route not found" });
