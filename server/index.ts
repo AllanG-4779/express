@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import categoryRouter from "./routes/category";
 import { logger } from "./middleware/logger";
 import postRouter from "./routes/posts";
+import userRouter from "./routes/user";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/category", categoryRouter);
 app.use("/api/v1/posts", postRouter);
+app.use("/api/v1/users", userRouter)
 // 404 handler
 app.use((req: Request, res: Response, next: NextFunction) => {
   return res.status(404).json({ message: "Route not found" });

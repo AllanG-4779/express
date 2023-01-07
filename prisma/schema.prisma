@@ -28,16 +28,16 @@ model Category {
 }
 
 model Post {
-  id         String   @id @default(uuid())
-  title      String   
-  category   Category @relation(fields: [categoryId], references: [id])
-  content    String
-  published  Boolean  @default(false)
-  author     User     @relation(fields: [authorId], references: [id])
-  createdAt  DateTime @default(now())
-  modifiedAt DateTime @updatedAt
-  authorId   String
-  categoryId String
+  id           String   @id @default(uuid())
+  title        String
+  category     Category @relation(fields: [categoryName], references: [name])
+  content      String
+  published    Boolean  @default(false)
+  author       User     @relation(fields: [authorId], references: [id])
+  createdAt    DateTime @default(now())
+  modifiedAt   DateTime @updatedAt
+  authorId     String
+  categoryName String
 }
 
 model Profile {

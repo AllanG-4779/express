@@ -8,7 +8,7 @@ export const addNewCategory = async (req: Request, res: Response) => {
 
   if (category.name !== null) {
    
-    const exist = await exists(res, "category", "name");
+    const exist = await exists(res, "category", category.name);
     if (exist) {
       return res.status(400).json({ message: "Category already added" });
     }

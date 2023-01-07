@@ -1,7 +1,7 @@
 import db from "../../utils/connection";
 import { Request, Response } from "express";
 
-export const deleteCategory = async (req:Request, res:Response) => {
+export const deleteCategory = async (req: Request, res: Response) => {
   const { id } = req.params;
   if (id === null) {
     return res.status(400).json({ message: "ID is required " });
@@ -21,6 +21,8 @@ export const deleteCategory = async (req:Request, res:Response) => {
     await db.category.delete({ where: { id } });
     return res.status(201).json({ message: `Category deleted` });
   } catch (error) {
-    return res.status(500).json({ message: "Something went wrong on our end!" });
+    return res
+      .status(500)
+      .json({ message: "Something went wrong on our end!" });
   }
-}
+};

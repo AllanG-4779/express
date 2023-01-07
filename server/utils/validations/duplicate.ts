@@ -9,7 +9,7 @@ export const isBlank = (item: string): Boolean => {
   return item === "";
 };
 export const isNull = (item: string): Boolean => {
-  return item === null;
+  return item === null || item === undefined;
 };
 export const exists = async (res: Response, model: string, field: string) => {
   let result = null;
@@ -26,5 +26,5 @@ export const exists = async (res: Response, model: string, field: string) => {
       result = await db.user.findFirst({ where: { email: field } });
       break;
   }
-  return result === null;
+  return result !== null 
 };

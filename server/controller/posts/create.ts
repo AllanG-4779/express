@@ -6,7 +6,7 @@ import {
   isNull,
 } from "../../utils/validations/duplicate";
 import db from "../../utils/connection";
-import { resourceLimits } from "worker_threads";
+
 export const createPost = async (req: Request, res: Response) => {
   // Check if there is a post to be made
   const post: Post = req.body;
@@ -18,10 +18,34 @@ export const createPost = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Title is required" });
   }
 
+  // Get the Author and the Category
+  // const author = await db.user.findFirst({
+  //   where: {
+  //     id: post.authorId,
+  //   },
+  // });
+  // const category = await db.category.findFirst({
+  //   where: {
+  //     name: post.categoryName,
+  //   },
+  // });
+  // if (!author) {
+  //   return res
+  //     .status(404)
+  //     .json({ message: "Are you logged in? User ID not found" });
+  // }
+  // if (!category) {
+  //   res.status(400).json({ message: "Invalid user ID passed" });
+  // }
   try {
-    await db.post.create({ data: post });
+    await db.post.create({
+      data: {
+        ...post,
+      },
+    });
     return res.status(201).json({ message: "New post was created" });
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ message: "Something went wrong on our side" });
@@ -62,3 +86,26 @@ export const updatePost = async (req: Request, res: Response) => {
   }
 };
 
+export const getPostById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  if (isNull(id)) {
+    return res.status(404).json({ message: "Post ID cannot be null" });
+  }
+  const post = await db.post.findFirst({ where: { id } });
+  return res.status(200).json(post);
+};
+export const getPosts = async (req: Request, res: Response) => {
+  if (req.method !== "GET") {
+    return res.status(405).json({ message: "Method not allowed" });
+  }
+  console.log(req.headers);
+  const posts = await db.post.findMany({
+    include: {
+      category: { select: { name: true } },
+      author: { select: { firstName: true, email: true } },
+    },
+  });
+  return res
+    .status(200)
+    .json({ message: `There are ${posts.length} Posts`, posts });
+};
