@@ -33,8 +33,31 @@ export const registerUser = async (req: Request, res: Response) => {
   }
   try {
     user.password = await hashPassword(user.password!);
-    const userCreation = await db.user.create({ data: user });
-    return res.status(201).json({ message: "User created", userCreation });
+    const user_role = await db.role.findFirst({ where: { name: "USER" } });
+
+    if (!user_role)
+      return res
+        .status(500)
+        .json({ message: "Something went wrong on our end" });
+    // Link the role upon signup
+    const new_user = await db.user.create({ data: user });
+
+    const linking = await db.userRole.create({
+      data: {
+        role: {
+          connect: {
+            id: user_role.id,
+          },
+        },
+        user: {
+          connect: {
+            id: new_user.id,
+          },
+        },
+      },
+    });
+
+    return res.status(201).json({ message: "User created", new_user });
   } catch (error) {
     console.log(typeof user.firstName);
     console.log(error);
