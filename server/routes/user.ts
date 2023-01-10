@@ -1,5 +1,11 @@
 import Router from "express";
-import { registerUser, getUsersPost } from "../controller/user/signup";
+import {
+  registerUser,
+  getUsersPost,
+  login,
+  logout,
+} from "../controller/user/signup";
+import { authenticated } from "../utils/auth";
 
 //initialize router
 const userRouter = Router();
@@ -7,7 +13,7 @@ const userRouter = Router();
 //add new user
 userRouter.post("/new", registerUser);
 // get all users
-userRouter.get("/all/:id/posts", getUsersPost);
+userRouter.get("/all/:id/posts", authenticated, getUsersPost);
 // //get user by id
 // router.patch("/:id");
 // //update user by id
@@ -15,7 +21,7 @@ userRouter.get("/all/:id/posts", getUsersPost);
 // //delete user by id
 // router.delete("/:id");
 // //login user
-// router.post("/login");
+userRouter.post("/login", login);
 // //logout user
-// router.get("/logout");
+userRouter.get("/logout", logout);
 export default userRouter;
