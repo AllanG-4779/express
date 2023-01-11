@@ -12,35 +12,38 @@ export const createPost = async (req: Request, res: Response) => {
   const post: Post = req.body;
   const { title, content } = post;
   if (!isCorrectLength(content, 20) || isBlank(content) || isNull(content)) {
-    return res.status(400).json({ message: "Content too short is empty" });
+    return res.status(400).json({ message: "Content too short or is empty" });
   }
   if (!isCorrectLength(title, 10) || isBlank(title) || isNull(title)) {
     return res.status(400).json({ message: "Title is required" });
   }
 
   // Get the Author and the Category
-  // const author = await db.user.findFirst({
-  //   where: {
-  //     id: post.authorId,
-  //   },
-  // });
-  // const category = await db.category.findFirst({
-  //   where: {
-  //     name: post.categoryName,
-  //   },
-  // });
-  // if (!author) {
-  //   return res
-  //     .status(404)
-  //     .json({ message: "Are you logged in? User ID not found" });
-  // }
-  // if (!category) {
-  //   res.status(400).json({ message: "Invalid user ID passed" });
-  // }
+  const author = await db.user.findFirst({
+    where: {
+      id: req.session.user?.id,
+    },
+  });
+
+  // The category
+  const category = await db.category.findFirst({
+    where: {
+      name: post.categoryName,
+    },
+  });
+  if (!author) {
+    return res
+      .status(404)
+      .json({ message: "Are you logged in? User ID not found" });
+  }
+  if (!category) {
+    res.status(400).json({ message: "Invalid user ID passed" });
+  }
   try {
     await db.post.create({
       data: {
         ...post,
+        authorId: author.id,
       },
     });
     return res.status(201).json({ message: "New post was created" });

@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { Post, User } from "@prisma/client";
 import { Request, Response } from "express";
 import { isBlank, isNull } from "../../utils/validations/duplicate";
 import { validNames } from "../../utils/validations/patterns";
@@ -66,39 +66,74 @@ export const registerUser = async (req: Request, res: Response) => {
 };
 
 export const getUsersPost = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  if (!id) return res.status(400).json({ message: "User ID is required" });
+  if (!req.session.user?.id)
+    return res.status(400).json({ message: "Authentication is required" });
 
-  const posts = await db.post.findMany({ where: { authorId: id } });
+  const posts = await db.post.findMany({
+    where: { authorId: req.session.user?.id },
+  });
+  if (posts?.length === 0)
+    return res
+      .status(200)
+      .json({ message: "You have not created any posts yet" });
   return res.json({ posts });
+};
+
+export const getUsersPostById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  if (!id) return res.status(400).json({ message: "Invalid Post ID" });
+  else {
+    let post: Post | null = null;
+    try {
+      post = await db.post.findFirst({
+        where: { id, authorId: req.session.user?.id },
+      });
+      if (!post) return res.status(404).json({ message: "Post not found" });
+      return res.status(200).json({ post });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "Something went wrong on our end" });
+    }
+  }
 };
 
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
+  // update the login attempts
 
   if (!username || !password) {
+    req.session.failedLoggins = req.session.failedLoggins + 1 || 1;
     return res.status(400).json("Username and Password is required");
   }
   let matches: boolean = false;
   let user: User | null = null;
   try {
-    user = await db.user.findFirst({ where: { email: username } });
+    user = await db.user.findFirst({
+      where: { email: username },
+      include: { roles: true },
+    });
     matches = await passwordMatch(user!, password);
   } catch (error) {
+    req.session.failedLoggins = req.session.failedLoggins + 1 || 1;
     return res.status(401).json({ message: "Invalid Username or Password" });
   }
   if (matches) {
     // Set the session here
     req.session.user = {
       email: user?.email,
-      name: `${user?.firstName} ${user?.lastName}`,
+      firstName: user?.firstName,
+      lastName: user?.lastName,
+      id: user?.id,
     };
     req.session.authenticated = true;
     return res.status(200).json({ message: "Authentication successfull" });
   } else {
+    req.session.failedLoggins = req.session.failedLoggins + 1 || 1;
     return res.status(401).json({ message: "Invalid Username and Password" });
   }
 };
+
 export const logout = async (req: Request, res: Response) => {
   req.session.destroy((err) => {
     if (err) return res.status(500).json({ message: "Something went wrong" });

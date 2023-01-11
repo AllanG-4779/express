@@ -3,6 +3,7 @@ import db from "../connection";
 db;
 
 export const isCorrectLength = (item: string, length: number): Boolean => {
+  if(item === undefined) return false
   return item.length > length;
 };
 export const isBlank = (item: string): Boolean => {

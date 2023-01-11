@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import db from "../../utils/connection";
 export const ROLES = {
-  ADMIN: "admin",
-  USER: "user",
-  OWNER: "owner",
+  ADMIN: "ADMIN",
+  USER: "USER",
+  OWNER: "OWNER",
 };
 export const PERMISSIONS = {
   ADD_ROLE: "add_role",
@@ -90,8 +90,8 @@ export const assignPermission = async (req: Request, res: Response) => {
   if (!role) {
     return res.status(400).json({ message: "Role does not exist" });
   }
-//   Connecting models via RAW string ID can also be achieved via 
-//   connecting the connect function in prisma
+  //   Connecting models via RAW string ID can also be achieved via
+  //   connecting the connect function in prisma
   const rolePermission = await db.rolePermission.create({
     data: {
       permission: {

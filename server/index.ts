@@ -8,6 +8,10 @@ import userRouter from "./routes/user";
 import adminRouter from "./routes/admin";
 import session, { SessionOptions } from "express-session";
 import cors from "cors";
+import { PrismaSessionStore } from "@quixo3/prisma-session-store";
+import db from "./utils/connection";
+import { PrismaClient } from "@prisma/client";
+import { authenticationRequired, isAdmin } from "./utils/auth_middleware";
 
 dotenv.config();
 
@@ -40,6 +44,12 @@ app.use(
       secure: false,
       sameSite: false,
     },
+
+    store: new PrismaSessionStore(db, {
+      checkPeriod: 2 * 60 * 1000,
+      dbRecordIdIsSessionId: true,
+      dbRecordIdFunction: undefined,
+    }),
   })
 );
 
@@ -48,7 +58,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/category", categoryRouter);
 app.use("/api/v1/posts", postRouter);
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/admin", isAdmin, adminRouter);
 // 404 handler
 app.use((req: Request, res: Response, next: NextFunction) => {
   return res.status(404).json({ message: "Route not found" });
