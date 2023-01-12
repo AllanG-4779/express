@@ -4,6 +4,8 @@ import { isBlank, isNull } from "../../utils/validations/duplicate";
 import { validNames } from "../../utils/validations/patterns";
 import db from "../../utils/connection";
 import { hashPassword, passwordMatch } from "../../utils/password";
+import { FileArray } from "express-fileupload";
+import path from "path";
 
 export const registerUser = async (req: Request, res: Response) => {
   // Get the request body object that contains the elements
@@ -139,4 +141,54 @@ export const logout = async (req: Request, res: Response) => {
     if (err) return res.status(500).json({ message: "Something went wrong" });
     else return res.status(200).json({ message: "Logout was successful" });
   });
+};
+export const updateProfile = async (req: Request, res: Response) => {
+  const files: FileArray = req.files!;
+  const { bio } = req.body;
+  if (isBlank(bio) || isNull(bio)) {
+    return res
+      .status(400)
+      .json({ status: "error", message: "You provided a short bio" });
+  }
+  // The body is present
+  let images = "";
+
+  Object.keys(files).forEach((eachFile) => {
+    const filename = files[eachFile].name;
+    let imagePath = path.join(
+      __dirname,
+      "../../../images",
+      filename.split(".")[0] +
+        req.session.user?.id +
+        "." +
+        filename.split(".")[1]
+    );
+    files[eachFile].mv(imagePath, (err) => {
+      if (err)
+        return res
+          .status(500)
+          .json({ message: "Something went wrong on our End" });
+      console.log("File uploaded successfully to this path", imagePath);
+    });
+    images = images + ";" + imagePath;
+  });
+  // Remove the trailing semicolon
+  images[0] === ";" ? images.replace(images[0], "") : images;
+  // Save the details
+  try {
+    const profile = await db.profile.create({
+      data: {
+        bio,
+        photo: images,
+        userId: req.session.user?.id,
+      },
+    });
+    return res
+      .status(200)
+      .json({ message: "Profile updated successfully", profile });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Something went wrong when trying to update your profile",
+    });
+  }
 };

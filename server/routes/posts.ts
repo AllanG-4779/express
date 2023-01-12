@@ -7,6 +7,7 @@ import {
   updatePost,
 } from "../controller/posts/create";
 import { authenticationRequired, isAuthor } from "../utils/auth_middleware";
+import db from "../utils/connection";
 
 const postRouter = Router();
 //add new post

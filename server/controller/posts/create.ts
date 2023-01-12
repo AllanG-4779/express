@@ -76,14 +76,14 @@ export const deletePost = async (req: Request, res: Response) => {
 export const updatePost = async (req: Request, res: Response) => {
   const { id } = req.params;
   const body = req.body;
-
-  if (!(id === null)) {
+  console.log(id)
+  if ((id === null)) {
     return res.status(400).json({ message: "ID is required" });
   }
 
   try {
     const item = await db.post.update({ where: { id }, data: body });
-    return res.status(200).json({ message: "post deleted successfully", item });
+    return res.status(200).json({ message: `${Object.keys(body).toString()} was updated successfully`});
   } catch (error) {
     return res.status(400).json({ message: "Something went wrong in our end" });
   }

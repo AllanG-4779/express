@@ -43,6 +43,7 @@ model Post {
 model Profile {
   id     String  @id @default(uuid())
   bio    String?
+  photo  String?
   user   User    @relation(fields: [userId], references: [id])
   userId String  @unique
 }
@@ -77,9 +78,10 @@ model RolePermission {
 
   @@id([roleId, permissionId])
 }
+
 model Session {
   id        String   @id
   sid       String   @unique
   data      String
-  expiresAt   DateTime
+  expiresAt DateTime
 }
